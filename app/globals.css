@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { --ink: #17202f; --muted: #718096; --line: #e7e9ee; --lavender: #e9e6ff; }
+* { box-sizing: border-box; }
+body { margin: 0; background: #f7f8fb; color: var(--ink); font-family: Arial, sans-serif; }
+button, textarea, input { font: inherit; }
+::selection { background: #dcd8ff; color: #312e81; }
+.grain { background-image: radial-gradient(#d9dbe4 0.65px, transparent 0.65px); background-size: 13px 13px; }
