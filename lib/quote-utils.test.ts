@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { calculateTotals, normalizeQuote } from "./quote-utils";
 
+// Las pruebas cubren los cálculos monetarios y la normalización de datos devueltos por IA.
 describe("quote utils", () => {
   it("calculates subtotal, tax and total from line items", () => {
     expect(calculateTotals([

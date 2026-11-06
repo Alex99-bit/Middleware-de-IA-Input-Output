@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 
+/** Intercambia el código de confirmación de Supabase por una sesión y abre el workspace. */
 export async function GET(request: Request) { const url = new URL(request.url); const code = url.searchParams.get("code"); if (code) await (await createSupabaseServerClient()).auth.exchangeCodeForSession(code); return NextResponse.redirect(new URL("/app", request.url)); }

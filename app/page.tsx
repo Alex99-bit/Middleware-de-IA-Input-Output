@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, FileCheck2, Sparkles, Zap } from "lucide-react";
 
+/** Landing pública: explica la propuesta de valor y dirige a registro o demo. */
 export default function Home() {
   return <main className="min-h-screen overflow-hidden bg-[#fbfbfd] text-[#17202f]">
     <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6"><div className="flex items-center gap-3"><div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#5b55d9] text-white"><Sparkles size={18} /></div><b className="text-lg tracking-tight">quoteflow<span className="text-[#5b55d9]">.</span></b></div><div className="flex items-center gap-5 text-sm"><Link href="/demo" className="text-[#667085] hover:text-[#5149c8]">Ver demo</Link><Link href="/login" className="rounded-lg bg-[#5b55d9] px-4 py-2.5 font-semibold text-white shadow-lg shadow-[#dcd9ff]">Entrar</Link></div></nav>
@@ -8,4 +9,5 @@ export default function Home() {
     <section className="mx-auto grid max-w-5xl gap-4 px-6 pb-20 md:grid-cols-3"><Feature icon={<Sparkles size={18} />} title="IA comercial" text="Entiende correos, WhatsApp y solicitudes sin estructura." /><Feature icon={<FileCheck2 size={18} />} title="PDF listo para enviar" text="Propuestas profesionales con tu marca, precios y próximos pasos." /><Feature icon={<Zap size={18} />} title="Memoria de tu equipo" text="Catálogo, historial y reglas comerciales centralizados." /></section>
   </main>;
 }
+/** Tarjeta reutilizable para resumir una capacidad del producto en la landing. */
 function Feature({ icon, title, text }: { icon: React.ReactNode; title: string; text: string }) { return <div className="rounded-2xl border border-[#e8e9ef] bg-white p-5 shadow-[0_3px_15px_rgba(36,39,56,.03)]"><div className="mb-4 flex h-9 w-9 items-center justify-center rounded-lg bg-[#eeedff] text-[#5b55d9]">{icon}</div><h2 className="font-bold">{title}</h2><p className="mt-2 text-sm leading-6 text-[#818998]">{text}</p></div>; }

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { normalizeQuote } from "@/lib/quote-utils";
 
+// JSON Schema que obliga a Gemini a devolver la estructura esperada por el producto.
 const responseSchema = {
   type: "OBJECT",
   properties: {
@@ -23,13 +24,16 @@ const responseSchema = {
   required: ["client_name", "summary", "line_items", "subtotal_amount", "tax_amount", "total_amount", "recommended_next_steps"],
 };
 
+/** Valida una solicitud, consulta Gemini con el catálogo y devuelve una cotización normalizada. */
 export async function POST(request: Request) {
   try {
     const body = await request.json();
     if (!body.request?.trim() || !Array.isArray(body.catalog)) return NextResponse.json({ error: "request y catalog son requeridos" }, { status: 400 });
     if (!process.env.GEMINI_API_KEY) return NextResponse.json({ error: "GEMINI_API_KEY no configurada" }, { status: 503 });
+    // Se envían los servicios y precios actuales para limitar la propuesta al catálogo del usuario.
     const catalog = body.catalog.map((item: { name: string; description: string; price: number; currency: string }) => `${item.name} | ${item.description} | ${item.price} ${item.currency}`).join("\n");
     const model = process.env.GEMINI_MODEL || "gemini-3.5-flash-lite";
+    // La clave solo se usa en servidor; Gemini responde en modo JSON estructurado.
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`, {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -45,6 +49,7 @@ export async function POST(request: Request) {
     }
     const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
     if (!content) return NextResponse.json({ error: "La IA no devolvió una cotización" }, { status: 502 });
+    // La normalización vuelve a calcular subtotales e impuestos antes de exponer el resultado.
     return NextResponse.json(normalizeQuote(JSON.parse(content)));
   } catch (error) {
     console.error("quote_api_error", error);
