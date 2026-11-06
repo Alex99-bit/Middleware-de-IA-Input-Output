@@ -5,6 +5,7 @@ import { ArrowUpRight, Check, ChevronDown, CircleHelp, FileText, LayoutGrid, Mor
 import type { CatalogItem, Quote } from "@/types";
 import { downloadQuotePdf } from "./QuotePdf";
 
+// Datos de ejemplo locales para que la demo funcione sin crear cuenta ni persistir cambios.
 const initialCatalog: CatalogItem[] = [
   { id: "1", name: "Implementación de CRM", description: "Configuración, migración y puesta en marcha", price: 1850, currency: "USD" },
   { id: "2", name: "Consultoría estratégica", description: "Sesión de consultoría especializada", price: 180, currency: "USD" },
@@ -12,15 +13,19 @@ const initialCatalog: CatalogItem[] = [
   { id: "4", name: "Soporte mensual", description: "Acompañamiento y soporte continuo", price: 450, currency: "USD" },
 ];
 const sampleText = "Hola equipo, somos Acme Studio. Estamos buscando implementar un CRM para 8 usuarios y nos gustaría contar con una sesión de consultoría para definir el proceso ideal. También necesitamos soporte durante el primer mes.";
+// Presenta los importes de la demo en USD sin decimales.
 const money = (value: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(value);
 
+/** Dashboard autónomo para probar el flujo de catálogo, generación IA y PDF. */
 export default function Dashboard() {
+  // Estado local de la demo: no se sincroniza con Supabase ni sobrevive al cierre.
   const [catalog, setCatalog] = useState(initialCatalog);
   const [request, setRequest] = useState(sampleText);
   const [quote, setQuote] = useState<Quote | null>(null);
   const [loading, setLoading] = useState(false);
   const [notice, setNotice] = useState("");
 
+  /** Solicita la cotización a la API y recurre a un ejemplo si el backend no está disponible. */
   async function generateQuote() {
     if (!request.trim()) return setNotice("Escribe una solicitud antes de generar la propuesta.");
     setLoading(true); setNotice("");
@@ -39,7 +44,9 @@ export default function Dashboard() {
     } finally { setLoading(false); }
   }
 
+  /** Agrega una fila editable al catálogo de muestra. */
   function addItem() { setCatalog([...catalog, { id: crypto.randomUUID(), name: "Nuevo servicio", description: "Descripción del servicio", price: 0, currency: "USD" }]); }
+  /** Actualiza un campo de servicio dentro del estado local de la demo. */
   function updateItem(id: string, field: keyof CatalogItem, value: string | number) { setCatalog(catalog.map((item) => item.id === id ? { ...item, [field]: value } : item)); }
 
   return <main className="min-h-screen bg-[#f7f8fb]">
@@ -58,6 +65,7 @@ export default function Dashboard() {
   </main>;
 }
 
+/** Muestra la propuesta resultante o el estado vacío antes de generar una cotización. */
 function QuotePreview({ quote, onDownload }: { quote: Quote | null; onDownload: () => void }) {
   return <section className="flex min-h-[650px] flex-col rounded-2xl border border-[#e6e8ef] bg-white p-6 shadow-[0_3px_15px_rgba(36,39,56,.03)] md:p-7"><div className="mb-6 flex items-center justify-between"><div><div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#625bdc]"><span className="h-1.5 w-1.5 rounded-full bg-[#625bdc]" /> Vista previa</div><h2 className="text-xl font-bold tracking-tight">Tu propuesta</h2></div>{quote && <span className="flex items-center gap-1.5 rounded-full bg-[#eaf8f0] px-2.5 py-1 text-[10px] font-bold text-[#3d9b68]"><Check size={12} /> LISTA</span>}</div>{!quote ? <div className="flex flex-1 flex-col items-center justify-center text-center"><div className="grain mb-5 flex h-20 w-20 items-center justify-center rounded-3xl bg-[#f1efff] text-[#8b85e8]"><FileText size={32} strokeWidth={1.5} /></div><h3 className="font-bold text-[#3b4352]">Tu cotización aparecerá aquí</h3><p className="mt-2 max-w-[230px] text-xs leading-5 text-[#9aa1af]">Analiza una solicitud para generar una propuesta comercial detallada.</p></div> : <div className="flex flex-1 flex-col"><div className="rounded-xl bg-[#f8f8ff] p-4"><p className="text-[10px] font-bold uppercase tracking-wider text-[#989caf]">Preparado para</p><p className="mt-1 text-lg font-bold">{quote.client_name}</p><p className="mt-2 text-xs leading-5 text-[#727b8d]">{quote.summary}</p></div><div className="mt-6"><div className="mb-3 grid grid-cols-[1fr_42px_78px] gap-2 text-[10px] font-bold uppercase tracking-wider text-[#a0a6b2]"><span>Concepto</span><span>Cant.</span><span className="text-right">Subtotal</span></div>{quote.line_items.map((item, i) => <div key={`${item.concept}-${i}`} className="grid grid-cols-[1fr_42px_78px] items-center gap-2 border-t border-[#eef0f4] py-3 text-xs"><div><p className="font-semibold text-[#3d4655]">{item.concept}</p><p className="mt-0.5 text-[10px] text-[#a0a6b2]">{money(item.unit_price)} / unidad</p></div><span className="text-[#687284]">{item.quantity}</span><span className="text-right font-semibold">{money(item.subtotal)}</span></div>)}</div><div className="mt-auto border-t border-[#e8eaf0] pt-4"><div className="flex justify-between text-xs text-[#828a99]"><span>Subtotal</span><span className="font-semibold text-[#4a5363]">{money(quote.subtotal_amount)}</span></div><div className="mt-2 flex justify-between text-xs text-[#828a99]"><span>IVA (16%)</span><span className="font-semibold text-[#4a5363]">{money(quote.tax_amount)}</span></div><div className="mt-4 flex items-end justify-between"><span className="text-sm font-bold">Total estimado</span><span className="text-3xl font-bold tracking-tight text-[#5149c8]">{money(quote.total_amount)}</span></div><div className="mt-4 rounded-lg bg-[#fffaf0] p-3 text-[11px] leading-4 text-[#89794f]"><b>Siguiente paso:</b> {quote.recommended_next_steps}</div><button onClick={onDownload} className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-[#d4d1ff] bg-[#f7f6ff] py-3 text-sm font-bold text-[#5b55d9] hover:bg-[#eeecff]"><Send size={16} /> Descargar PDF</button></div></div>}</section>;
 }

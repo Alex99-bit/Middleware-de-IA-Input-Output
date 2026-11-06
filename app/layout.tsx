@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   description: "Convierte solicitudes comerciales en propuestas listas para enviar.",
 };
 
+/** Layout raíz que establece idioma, estilos globales y metadatos de QuoteFlow. */
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return <html lang="es"><body>{children}</body></html>;
 }
