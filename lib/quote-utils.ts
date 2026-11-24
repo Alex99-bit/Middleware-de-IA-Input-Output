@@ -1,4 +1,5 @@
 import type { LineItem, Quote } from "@/types";
+import { DEFAULT_CURRENCY } from "./currency";
 
 /** Suma los importes de los conceptos y calcula el impuesto y total final. */
 export function calculateTotals(lineItems: LineItem[], taxRate = 0.16) {
@@ -14,5 +15,5 @@ export function normalizeQuote(quote: Quote): Quote {
     quantity: Math.max(1, Math.round(item.quantity)),
     unit_price: Number(item.unit_price),
   })).map((item) => ({ ...item, subtotal: item.quantity * item.unit_price }));
-  return { ...quote, line_items, ...calculateTotals(line_items) };
+  return { ...quote, currency: quote.currency || DEFAULT_CURRENCY, line_items, ...calculateTotals(line_items) };
 }

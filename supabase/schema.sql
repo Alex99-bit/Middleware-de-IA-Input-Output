@@ -2,7 +2,7 @@ create extension if not exists "pgcrypto";
 
 -- Datos de empresa compartidos por sus integrantes; el branding se reutiliza en propuestas.
 create table public.workspaces (
-  id uuid primary key default gen_random_uuid(), name text not null default 'Mi empresa', logo_url text, brand_color text not null default '#5b55d9', created_at timestamptz not null default now()
+  id uuid primary key default gen_random_uuid(), name text not null default 'Mi empresa', logo_url text, brand_color text not null default '#5b55d9', currency text not null default 'USD', created_at timestamptz not null default now()
 );
 -- Relación usuario-workspace con rol para habilitar permisos de equipo.
 create table public.workspace_members (

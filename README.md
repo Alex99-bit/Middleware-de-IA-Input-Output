@@ -9,6 +9,8 @@ Middleware SaaS para convertir solicitudes comerciales en cotizaciones con IA.
 - `/app`: workspace privado con catálogo, cotizador, historial y exportación CSV.
 - `/demo`: versión demostración sin autenticación.
 
+La moneda se configura por workspace en **Configuración** y se aplica a nuevas cotizaciones, el historial, CSV y PDF. Cambiarla no convierte automáticamente los precios existentes ni modifica cotizaciones anteriores. Para actualizar un proyecto Supabase existente, ejecuta `supabase/migrations/20261124_add_workspace_currency.sql`; en instalaciones nuevas, `supabase/schema.sql` ya incluye la columna.
+
 ## Configuración local
 
 1. Crea un proyecto en Supabase.

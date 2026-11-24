@@ -1,11 +1,11 @@
 {
     "schema_version": 1,
-    "commit": "8ca56c748c7d161125d5af09b5470973e5eefe1e",
-    "indexed_at": "2026-11-06T20:18:41Z",
+    "commit": "784dd7102e3f639216ca485c5664b0d77e3e7b85",
+    "indexed_at": "2026-11-24T17:07:10Z",
     "project": "Users-alexc-Documents-GitHub-Middleware-de-IA-Input-Output",
-    "nodes": 127,
-    "edges": 197,
-    "original_size": 1572864,
-    "compressed_size": 163168,
-    "compression_level": 9
+    "nodes": 153,
+    "edges": 235,
+    "original_size": 2293760,
+    "compressed_size": 232512,
+    "compression_level": 3
 }

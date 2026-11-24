@@ -12,7 +12,7 @@ describe("quote utils", () => {
 
   it("normalizes quantities and prevents stale AI totals", () => {
     const quote = normalizeQuote({
-      client_name: "Acme", summary: "Resumen", recommended_next_steps: "Llamar",
+      client_name: "Acme", summary: "Resumen", currency: "USD", recommended_next_steps: "Llamar",
       line_items: [{ concept: "Consultoría", quantity: 1.6, unit_price: 180, subtotal: 999 }],
       subtotal_amount: 999, tax_amount: 999, total_amount: 999,
     });

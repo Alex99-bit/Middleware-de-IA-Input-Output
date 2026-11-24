@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { DEFAULT_CURRENCY, isCurrencyCode } from "@/lib/currency";
 import { normalizeQuote } from "@/lib/quote-utils";
 
 // JSON Schema que obliga a Gemini a devolver la estructura esperada por el producto.
@@ -30,14 +31,16 @@ export async function POST(request: Request) {
     const body = await request.json();
     if (!body.request?.trim() || !Array.isArray(body.catalog)) return NextResponse.json({ error: "request y catalog son requeridos" }, { status: 400 });
     if (!process.env.GEMINI_API_KEY) return NextResponse.json({ error: "GEMINI_API_KEY no configurada" }, { status: 503 });
+    const currency = body.currency ?? DEFAULT_CURRENCY;
+    if (!isCurrencyCode(currency)) return NextResponse.json({ error: "Moneda no compatible" }, { status: 400 });
     // Se envían los servicios y precios actuales para limitar la propuesta al catálogo del usuario.
-    const catalog = body.catalog.map((item: { name: string; description: string; price: number; currency: string }) => `${item.name} | ${item.description} | ${item.price} ${item.currency}`).join("\n");
+    const catalog = body.catalog.map((item: { name: string; description: string; price: number }) => `${item.name} | ${item.description} | ${item.price} ${currency}`).join("\n");
     const model = process.env.GEMINI_MODEL || "gemini-3.5-flash-lite";
     // La clave solo se usa en servidor; Gemini responde en modo JSON estructurado.
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`, {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        systemInstruction: { parts: [{ text: "Eres un motor experto en análisis comercial y cotizaciones B2B. Lee una solicitud desestructurada y crúzala exclusivamente con el catálogo entregado. Si no se menciona el cliente usa Cliente Potencial. No inventes servicios ni precios. Calcula subtotales, subtotal_amount, tax_amount con IVA de 16% y total_amount. Resume en exactamente 2 oraciones." }] },
+        systemInstruction: { parts: [{ text: `Eres un motor experto en análisis comercial y cotizaciones B2B. Lee una solicitud desestructurada y crúzala exclusivamente con el catálogo entregado. Si no se menciona el cliente usa Cliente Potencial. No inventes servicios ni precios ni conviertas importes. Todos los valores monetarios deben expresarse en ${currency}. Calcula subtotales, subtotal_amount, tax_amount con IVA de 16% y total_amount. Resume en exactamente 2 oraciones.` }] },
         contents: [{ role: "user", parts: [{ text: `CATÁLOGO DISPONIBLE:\n${catalog}\n\nSOLICITUD DEL CLIENTE:\n${body.request}` }] }],
         generationConfig: { temperature: 0.1, responseMimeType: "application/json", responseSchema },
       }),
@@ -50,7 +53,7 @@ export async function POST(request: Request) {
     const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
     if (!content) return NextResponse.json({ error: "La IA no devolvió una cotización" }, { status: 502 });
     // La normalización vuelve a calcular subtotales e impuestos antes de exponer el resultado.
-    return NextResponse.json(normalizeQuote(JSON.parse(content)));
+    return NextResponse.json(normalizeQuote({ ...JSON.parse(content), currency }));
   } catch (error) {
     console.error("quote_api_error", error);
     return NextResponse.json({ error: "No se pudo procesar la solicitud" }, { status: 500 });
